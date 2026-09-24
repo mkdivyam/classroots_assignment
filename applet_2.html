@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decode the Passcode</title>
+<style>
+  :root{
+    --blue:#1a73c7; --pink-bg:#dd93a0; --panel:#fbe3e0;
+    --red:#c0304a; --red-dark:#8f2038; --green:#3f8f4a; --green-dark:#2c6b34;
+    --ink:#2a2430; --stepper:#1a4fa0;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;overflow:hidden;background:#111;
+     font-family:'Segoe UI',system-ui,Helvetica,Arial,sans-serif;color:var(--ink);}
+  #viewport{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+  #stage{width:1220px;height:690px;background:#fff;position:relative;overflow:hidden;
+     box-shadow:0 0 24px rgba(0,0,0,.4);transform-origin:center center;}
+  .frame{width:100%;height:100%;display:flex;flex-direction:column;}
+  .bar{background:var(--blue);color:#fff;height:64px;flex:0 0 64px;padding:0 24px;font-weight:700;font-size:22px;
+       display:flex;align-items:center;justify-content:center;position:relative;transition:background .35s ease;}
+  .bar.red{background:var(--red);} .bar.green{background:var(--green);}
+  .brand{position:absolute;right:24px;top:50%;transform:translateY(-50%);font-weight:800;font-size:22px;}
+  .brand .edu{color:#c9b8ff;}
+  .body{flex:1;background:var(--pink-bg);padding:22px 26px;display:flex;flex-direction:column;align-items:center;
+        justify-content:center;overflow:hidden;}
+  button{font:inherit;cursor:pointer;border:none;border-radius:6px;padding:12px 26px;font-weight:700;color:#fff;}
+  .btn-primary{background:var(--red);} .btn-primary:hover{background:var(--red-dark);}
+  .btn-go{background:#2fa84f;} .btn-go:hover{background:var(--green-dark);}
+  .btn-reset{background:var(--red);}
+  .tapper{display:inline-block;margin-left:10px;font-size:22px;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.25);}}
+
+  .row2{display:flex;gap:24px;width:100%;max-width:1080px;align-items:flex-start;}
+  .textpanel{background:var(--panel);border-radius:6px;padding:26px 30px;font-size:17px;line-height:1.5;flex:1.15;}
+  .rightcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:26px;padding-top:8px;}
+  .digits{display:flex;gap:18px;}
+  .digitcol{display:flex;flex-direction:column;align-items:center;gap:8px;}
+  .digitcol button{width:38px;height:38px;padding:0;border-radius:50%;font-size:20px;background:#2fa84f;}
+  .digitcol button.minus{background:#c0304a;}
+  .digitcol button:disabled{opacity:.35;cursor:default;}
+  .digitbox{background:var(--stepper);color:#fff;min-width:56px;text-align:center;padding:10px 0;border-radius:6px;
+       font-weight:700;font-size:22px;}
+  .stack{display:flex;flex-direction:column;gap:14px;width:220px;}
+  .stack button{width:100%;font-size:17px;}
+
+  .foot{height:64px;flex:0 0 64px;background:var(--blue);color:#fff;display:flex;transition:background .35s ease;}
+  .foot-text{flex:1;display:flex;align-items:center;padding:0 24px;font-style:italic;font-size:16px;}
+  .foot-btn{display:none;height:100%;padding:0 34px;border:none;color:#fff;font-weight:800;font-size:18px;
+     border-radius:0;cursor:pointer;}
+  .foot.red{background:var(--red);} .foot.green{background:var(--green);}
+  .foot.red .foot-btn{background:var(--red-dark);display:block;}
+  .foot.green .foot-btn{background:var(--green-dark);display:block;}
+  .foot.nav .foot-btn{background:#1a4fa0;display:block;}
+
+  .exp-cols{display:flex;gap:22px;width:100%;max-width:1080px;}
+  .exp-left{background:var(--panel);border-radius:6px;padding:22px 26px;flex:1.7;font-size:17px;line-height:1.4;}
+  .exp-right{background:var(--panel);border-radius:6px;padding:22px 26px;flex:1;font-size:17px;line-height:1.6;align-self:flex-start;}
+  .exp-left h4{margin:14px 0 4px;font-style:italic;}
+  .exp-left h4:first-child{margin-top:0;}
+  .exp-left .eq{margin:0 0 8px 10px;font-family:Cambria,Georgia,serif;font-size:18px;}
+  .steprow{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px;}
+  .steprow .badges{display:flex;gap:8px;}
+  .badge{background:var(--stepper);color:#fff;min-width:44px;text-align:center;padding:8px 0;border-radius:6px;
+     font-weight:700;font-size:19px;}
+  .stepnote{margin-bottom:18px;}
+  .finalrow{display:flex;gap:10px;justify-content:center;margin-top:26px;}
+  .hidden{display:none !important;}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage"><div class="frame">
+  <div class="bar" id="topbar"><span id="barText">Solve the puzzle : Decode the Passcode!</span>
+    <span class="brand">ClassRoots<span class="edu">Edu</span></span>
+  </div>
+
+  <div class="body">
+    <section id="hook" class="row2">
+      <div class="textpanel">
+        The weights of the apples and bananas are unknown. All apples weigh the same, and all bananas weigh the same.
+        Two apples and five bananas weigh 800&nbsp;g, while four apples and nine bananas weigh 1,500&nbsp;g.
+        An unknown package weighs 1150&nbsp;g and contains at least three apples and three bananas, with more apples than bananas.
+        <br><br>
+        Decode the 4-digit passcode: the first two digits are the total number of fruits × 3. The third digit
+        is the number of apples, and the fourth is the number of bananas.
+      </div>
+      <div class="rightcol">
+        <button class="btn-primary" onclick="goInteractive()">Decode the<br>Passcode!<span class="tapper">👆</span></button>
+      </div>
+    </section>
+
+    <section id="interactive" class="row2 hidden">
+      <div class="textpanel">
+        The weights of the apples and bananas are unknown. All apples weigh the same, and all bananas weigh the same.
+        Two apples and five bananas weigh 800&nbsp;g, while four apples and nine bananas weigh 1,500&nbsp;g.
+        An unknown package weighs 1150&nbsp;g and contains at least three apples and three bananas, with more apples than bananas.
+        <br><br>
+        Decode the 4-digit passcode: the first two digits are the total number of fruits × 3. The third digit
+        is the number of apples, and the fourth is the number of bananas.
+      </div>
+      <div class="rightcol">
+        <div class="digits" id="digitsRow"></div>
+        <div class="stack">
+          <button class="btn-go" onclick="checkPasscode()">Check the Passcode!</button>
+          <button class="btn-reset" onclick="resetDigits()">Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="explain" class="exp-cols hidden">
+      <div class="exp-left" id="expLeft"></div>
+      <div class="exp-right" id="expRight"></div>
+    </section>
+  </div>
+
+  <div class="foot" id="footbar">
+    <div class="foot-text" id="footText"></div>
+    <button class="foot-btn" id="footBtn"></button>
+  </div>
+</div></div></div>
+
+<script>
+function fitStage(){
+  const s=Math.min(window.innerWidth/1220, window.innerHeight/690)*0.97;
+  document.getElementById('stage').style.transform='scale('+s+')';
+}
+window.addEventListener('resize',fitStage); fitStage();
+
+const TARGET=[2,7,5,4];
+let digits=[0,0,0,0];
+const digitsRow=document.getElementById('digitsRow');
+digits.forEach((v,i)=>{
+  const col=document.createElement('div'); col.className='digitcol';
+  col.innerHTML='<button class="plus" onclick="change('+i+',1)">+</button>'+
+    '<span class="digitbox" id="d'+i+'">'+v+'</span>'+
+    '<button class="minus" onclick="change('+i+',-1)">−</button>';
+  digitsRow.appendChild(col);
+});
+function renderDigits(){
+  digits.forEach((v,i)=>{
+    document.getElementById('d'+i).textContent=v;
+    const col=digitsRow.children[i];
+    col.querySelector('.plus').disabled = v===9;
+    col.querySelector('.minus').disabled = v===0;
+  });
+}
+function change(i,d){ digits[i]=Math.min(9,Math.max(0,digits[i]+d)); renderDigits(); }
+function resetDigits(){ digits=[0,0,0,0]; renderDigits(); }
+
+function goInteractive(){
+  document.getElementById('hook').classList.add('hidden');
+  document.getElementById('interactive').classList.remove('hidden');
+  document.getElementById('footText').textContent='"Check the Passcode!" once you fill the code.';
+  renderDigits();
+}
+function setBar(mode,text){
+  const top=document.getElementById('topbar'), foot=document.getElementById('footbar');
+  top.classList.remove('red','green'); foot.classList.remove('red','green','nav');
+  if(mode==='red'){top.classList.add('red');foot.classList.add('red');}
+  if(mode==='green'){top.classList.add('green');foot.classList.add('green');}
+  document.getElementById('barText').textContent=text;
+}
+function checkPasscode(){
+  const correct = digits.every((v,i)=>v===TARGET[i]);
+  const btn=document.getElementById('footBtn');
+  if(correct){
+    setBar('green','The passcode is correct!!!');
+    document.getElementById('footText').textContent='Tap on Next Button to check explanation!';
+    btn.textContent='Next'; btn.onclick=()=>showExplain(1);
+  } else {
+    setBar('red','The passcode is incorrect!!!');
+    document.getElementById('footText').textContent='Tap on Retry Button to try again!';
+    btn.textContent='Retry'; btn.onclick=retry;
+  }
+}
+function retry(){
+  setBar('normal','Solve the puzzle : Decode the Passcode!');
+  document.getElementById('footText').textContent='"Check the Passcode!" once you fill the code.';
+  document.getElementById('footBtn').onclick=null;
+}
+function showExplain(step){
+  document.getElementById('interactive').classList.add('hidden');
+  document.getElementById('explain').classList.remove('hidden');
+  setBar('normal','How does this work?');
+  const L=document.getElementById('expLeft'), R=document.getElementById('expRight'), foot=document.getElementById('footbar');
+  const btn=document.getElementById('footBtn');
+  foot.classList.add('nav');
+  if(step===1){
+    L.innerHTML='<h4>Step 1: Find the weight of each fruit</h4>'+
+      '<h4>First Package</h4><div class="eq">2<b>Wa</b> + 5<b>Wb</b> = 800</div>'+
+      '<h4>Second Package</h4><div class="eq">4<b>Wa</b> + 9<b>Wb</b> = 1500</div>'+
+      '<h4>This gives us:</h4><div class="eq"><b>Wa</b> = 150 gm</div><div class="eq"><b>Wb</b> = 100 gm</div>';
+    R.innerHTML='<div>Weight of Apple : <b>Wa</b></div><div>Weight of Banana : <b>Wb</b></div>';
+    document.getElementById('footText').textContent='Tap on Next Button to move to next page!';
+    btn.textContent='Next'; btn.onclick=()=>showExplain(2);
+  } else if(step===2){
+    L.innerHTML='<h4>Step 2: Find the number of fruits in the unknown package</h4>'+
+      '<h4>Unknown Package</h4><div class="eq">150<b>a</b> + 100<b>b</b> = 1150</div><div class="eq"><b>a</b> &ge; 3; <b>b</b> &ge; 3</div><div class="eq"><b>a</b> &ge; <b>b</b></div>'+
+      '<h4>This gives us:</h4><div class="eq"><b>a</b> = 5</div><div class="eq"><b>b</b> = 4</div>';
+    R.innerHTML='<div>Weight of Apple : <b>150 gm</b></div><div>Weight of Banana : <b>100 gm</b></div><br>'+
+      '<div>No. of Apples : <b>a</b></div><div>No. of Bananas : <b>b</b></div>';
+    document.getElementById('footText').textContent='Tap on Next Button to move to next page!';
+    btn.textContent='Next'; btn.onclick=()=>showExplain(3);
+  } else if(step===3){
+    L.innerHTML='<h4>Step 3: Decode the Passcode!</h4>'+
+      '<div class="steprow"><div><b><i>First two digits</i></b><br>= total fruits &times; 3<br>= (5 + 4) &times; 3 = 27</div>'+
+      '<div class="badges"><span class="badge" id="b0">2</span><span class="badge" id="b1">7</span></div></div>'+
+      '<div class="steprow"><div><b><i>Third digit</i></b><br>= number of apples<br>= 5</div>'+
+      '<div class="badges"><span class="badge" id="b2">5</span></div></div>'+
+      '<div class="steprow"><div><b><i>Fourth digit</i></b><br>= number of bananas<br>= 4</div>'+
+      '<div class="badges"><span class="badge" id="b3">4</span></div></div>'+
+      '<div class="finalrow hidden" id="finalRow"></div>';
+    R.innerHTML='<div>Weight of Apple : <b>150 gm</b></div><div>Weight of Banana : <b>100 gm</b></div><br>'+
+      '<div>No. of Apples : <b>5</b></div><div>No. of Bananas : <b>4</b></div>';
+    document.getElementById('footText').textContent='Tap on Next Button to reveal the passcode!';
+    btn.textContent='Next'; btn.onclick=morphToPasscode;
+  }
+}
+function morphToPasscode(){
+  const foot=document.getElementById('footbar');
+  const final=document.getElementById('finalRow');
+  final.classList.remove('hidden');
+  final.innerHTML='<span class="badge" style="opacity:0" id="f0">2</span><span class="badge" style="opacity:0" id="f1">7</span><span class="badge" style="opacity:0" id="f2">5</span><span class="badge" style="opacity:0" id="f3">4</span>';
+  [0,1,2,3].forEach(i=>{
+    const src=document.getElementById('b'+i), dst=document.getElementById('f'+i);
+    const sr=src.getBoundingClientRect();
+    const clone=document.createElement('div');
+    clone.textContent=src.textContent;
+    clone.style.cssText='position:fixed;left:'+sr.left+'px;top:'+sr.top+'px;width:'+sr.width+'px;height:'+sr.height+'px;'+
+      'background:#1a4fa0;color:#fff;border-radius:6px;font-weight:700;font-size:19px;display:flex;align-items:center;justify-content:center;z-index:50;transition:left .55s ease,top .55s ease;';
+    document.body.appendChild(clone);
+    requestAnimationFrame(()=>{
+      const dr=dst.getBoundingClientRect();
+      clone.style.left=dr.left+'px'; clone.style.top=dr.top+'px';
+    });
+    setTimeout(()=>{ clone.remove(); dst.style.opacity=1; },560);
+  });
+  document.getElementById('footText').textContent='';
+  document.getElementById('footBtn').textContent='Play Again';
+  document.getElementById('footBtn').onclick=restartAll;
+}
+function restartAll(){
+  digits=[0,0,0,0];
+  document.getElementById('explain').classList.add('hidden');
+  document.getElementById('hook').classList.remove('hidden');
+  setBar('normal','Solve the puzzle : Decode the Passcode!');
+  document.getElementById('footbar').classList.remove('nav');
+  document.getElementById('footText').textContent='';
+  document.getElementById('footBtn').onclick=null;
+}
+</script>
+</body>
+</html>

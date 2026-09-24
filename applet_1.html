@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find the Count of Each Fruit</title>
+<style>
+  :root{
+    --blue:#1a73c7; --pink-bg:#dd93a0; --panel:#fbe3e0;
+    --red:#c0304a; --red-dark:#8f2038; --green:#3f8f4a; --green-dark:#2c6b34;
+    --ink:#2a2430; --stepper:#1a4fa0;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;overflow:hidden;background:#111;
+     font-family:'Segoe UI',system-ui,Helvetica,Arial,sans-serif;color:var(--ink);}
+  #viewport{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+  #stage{width:1220px;height:690px;background:#fff;position:relative;overflow:hidden;
+     box-shadow:0 0 24px rgba(0,0,0,.4);transform-origin:center center;}
+  .frame{width:100%;height:100%;display:flex;flex-direction:column;}
+  .bar{background:var(--blue);color:#fff;height:64px;flex:0 0 64px;padding:0 24px;font-weight:700;font-size:22px;
+       display:flex;align-items:center;justify-content:center;position:relative;transition:background .35s ease;}
+  .bar.red{background:var(--red);} .bar.green{background:var(--green);}
+  .brand{position:absolute;right:24px;top:50%;transform:translateY(-50%);font-weight:800;font-size:22px;}
+  .brand .edu{color:#c9b8ff;}
+  .body{flex:1;background:var(--pink-bg);padding:22px 26px;display:flex;flex-direction:column;align-items:center;
+        justify-content:center;overflow:hidden;}
+  .panel{background:var(--panel);max-width:1000px;width:100%;border-radius:6px;padding:22px 30px;font-size:19px;line-height:1.45;}
+  .fruits{display:flex;justify-content:center;gap:80px;margin:18px 0 4px;font-size:44px;line-height:1.1;}
+  .cta-row{text-align:center;margin-top:16px;}
+  button{font:inherit;cursor:pointer;border:none;border-radius:6px;padding:12px 26px;font-weight:700;color:#fff;}
+  .btn-primary{background:var(--red);} .btn-primary:hover{background:var(--red-dark);}
+  .btn-go{background:#2fa84f;} .btn-go:hover{background:var(--green-dark);}
+  .btn-reset{background:var(--red);}
+  .tapper{display:inline-block;margin-left:10px;font-size:22px;animation:pulse 1s infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.25);}}
+
+  .cols{display:flex;gap:24px;justify-content:center;width:100%;max-width:1050px;}
+  .col{background:var(--panel);border-radius:6px;padding:20px;flex:1;min-height:280px;}
+  .col h3{margin:0 0 14px;text-align:center;font-size:22px;}
+  .fruitrow{display:flex;align-items:center;justify-content:center;gap:6px;font-size:32px;margin-bottom:10px;}
+  .stepper{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:4px;}
+  .stepper button{width:36px;height:36px;padding:0;border-radius:50%;font-size:20px;background:#c0304a;}
+  .stepper button.plus{background:#2fa84f;}
+  .stepper button:disabled{opacity:.35;cursor:default;}
+  .count{background:var(--stepper);color:#fff;min-width:50px;text-align:center;padding:8px 0;border-radius:6px;
+         font-weight:700;font-size:19px;}
+  .meta{text-align:center;color:#4a3f4c;font-size:14px;margin-bottom:14px;}
+  .actions{display:flex;flex-direction:column;gap:14px;justify-content:center;align-items:stretch;}
+  .actions button{font-size:18px;}
+
+  .calc h4{margin:0 0 6px;font-style:italic;font-size:16px;}
+  .calc .line{display:flex;justify-content:space-between;color:var(--red);font-weight:600;font-size:16px;}
+  .calc.ok .line{color:var(--green-dark);}
+  .calc hr{border:none;border-top:1px solid #b98f95;margin:5px 0 10px;}
+  .calc .total{font-weight:800;font-size:18px;}
+
+  .foot{height:64px;flex:0 0 64px;background:var(--blue);color:#fff;display:flex;
+        transition:background .35s ease;}
+  .foot-text{flex:1;display:flex;align-items:center;padding:0 24px;font-style:italic;font-size:16px;}
+  .foot-btn{display:none;height:100%;padding:0 34px;border:none;color:#fff;font-weight:800;font-size:18px;
+     border-radius:0;cursor:pointer;}
+  .foot.red{background:var(--red);} .foot.green{background:var(--green);}
+  .foot.red .foot-btn{background:var(--red-dark);display:block;}
+  .foot.green .foot-btn{background:var(--green-dark);display:block;}
+
+  .explain-cols{display:flex;gap:22px;width:100%;max-width:1050px;}
+  .explain-cols .ep{background:var(--panel);border-radius:6px;padding:22px 26px;flex:1;font-size:17px;line-height:1.5;}
+  .explain-cols h4{margin:0 0 6px;font-style:italic;}
+  .explain-cols .eqline{margin:0 0 16px 10px;font-family:Cambria,Georgia,serif;font-size:19px;}
+  .explain-cols .defline{margin-bottom:10px;}
+  .hidden{display:none !important;}
+  .flying-num{position:fixed;background:var(--stepper);color:#fff;border-radius:6px;font-weight:700;
+     display:flex;align-items:center;justify-content:center;z-index:50;transition:left .55s ease,top .55s ease,transform .55s ease;}
+</style>
+</head>
+<body>
+<div id="viewport"><div id="stage"><div class="frame">
+  <div class="bar" id="topbar"><span id="barText">Find the count of each fruit!</span>
+    <span class="brand" id="brand">ClassRoots<span class="edu">Edu</span></span>
+  </div>
+
+  <div class="body">
+
+    <section id="hook" class="panel">
+      <p>Rajesh went to buy fruits from a nearby seller. He wants to buy a mix of Apples and Bananas.
+      Each apple weighs 200&nbsp;gm and costs ₹12. Each banana weighs 150&nbsp;gm and costs ₹6.</p>
+      <p>The final check-out weighed 1&nbsp;kg and cost ₹48. How many Apples and Bananas does Rajesh buy?</p>
+      <div class="fruits">
+        <div>🍎🍎🍎<br>&nbsp;&nbsp;🍎🍎</div>
+        <div>🍌🍌🍌<br>&nbsp;&nbsp;🍌🍌</div>
+      </div>
+      <div class="cta-row">
+        <button class="btn-primary" onclick="goInteractive()">Attempt the Puzzle!<span class="tapper">👆</span></button>
+      </div>
+    </section>
+
+    <section id="interactive" class="hidden" style="width:100%;display:flex;justify-content:center;">
+      <div class="cols">
+        <div class="col">
+          <h3>Seller</h3>
+          <div class="fruitrow">🍎🍎🍎🍎🍎</div>
+          <div class="fruitrow">🍌🍌🍌🍌🍌</div>
+        </div>
+        <div class="col">
+          <div class="stepper">
+            <button class="minus" onclick="change('a',-1)">−</button>
+            <span class="count" id="cntA">0</span>
+            <button class="plus" onclick="change('a',1)">+</button>
+          </div>
+          <div class="meta">200 gm each · ₹12 each</div>
+          <div class="stepper">
+            <button class="minus" onclick="change('b',-1)">−</button>
+            <span class="count" id="cntB">0</span>
+            <button class="plus" onclick="change('b',1)">+</button>
+          </div>
+          <div class="meta">150 gm each · ₹6 each</div>
+        </div>
+        <div class="col">
+          <div class="actions" id="actionsBox">
+            <button class="btn-go" onclick="checkout()">Check-out</button>
+            <button class="btn-reset" onclick="resetAll()">Reset</button>
+          </div>
+          <div class="calc hidden" id="calcBox">
+            <h4>Check-out Weight</h4>
+            <div class="line"><span id="wA"></span><span id="wAval"></span></div>
+            <div class="line"><span id="wB"></span><span id="wBval"></span></div>
+            <hr><div class="line total"><span>Total</span><span id="wTotal"></span></div>
+            <h4>Check-out Price</h4>
+            <div class="line"><span id="pA"></span><span id="pAval"></span></div>
+            <div class="line"><span id="pB"></span><span id="pBval"></span></div>
+            <hr><div class="line total"><span>Total</span><span id="pTotal"></span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="explain" class="hidden" style="width:100%;display:flex;justify-content:center;">
+      <div class="explain-cols">
+        <div class="ep">
+          <div class="defline">No. of Apples : <b>a</b></div>
+          <div class="defline">No. of Bananas : <b>b</b></div>
+          <div class="defline">Weight of Apple : 200 gm<br>Weight of Banana : 150 gm</div>
+          <div class="defline">Cost of Apple : Rs 12<br>Cost of Banana : Rs 6</div>
+        </div>
+        <div class="ep">
+          <h4>Check-out Weight</h4>
+          <div class="eqline">200a + 150b = 1000</div>
+          <h4>Check-out Price</h4>
+          <div class="eqline">12a + 6b = 48</div>
+          <h4>This gives us:</h4>
+          <div class="eqline" id="ansA">a = 2</div>
+          <div class="eqline" id="ansB">b = 4</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="foot" id="footbar">
+    <div class="foot-text" id="footText"></div>
+    <button class="foot-btn" id="footBtn"></button>
+  </div>
+</div></div></div>
+
+<script>
+function fitStage(){
+  const s=Math.min(window.innerWidth/1220, window.innerHeight/690)*0.97;
+  document.getElementById('stage').style.transform='scale('+s+')';
+}
+window.addEventListener('resize',fitStage); fitStage();
+
+let a=0,b=0;
+function goInteractive(){
+  document.getElementById('hook').classList.add('hidden');
+  document.getElementById('interactive').classList.remove('hidden');
+  document.getElementById('footText').textContent='Tap on "Check-out" when you get the right combination of fruits.';
+  render();
+}
+function change(which,d){
+  if(which==='a') a=Math.min(10,Math.max(0,a+d)); else b=Math.min(10,Math.max(0,b+d));
+  render();
+}
+function resetAll(){ a=0;b=0; render(); }
+function render(){
+  document.getElementById('cntA').textContent=a;
+  document.getElementById('cntB').textContent=b;
+  const st=document.querySelectorAll('.stepper');
+  st[0].children[0].disabled=a===0; st[0].children[2].disabled=a===10;
+  st[1].children[0].disabled=b===0; st[1].children[2].disabled=b===10;
+}
+function setBar(mode,text){
+  const top=document.getElementById('topbar'), foot=document.getElementById('footbar');
+  top.classList.remove('red','green'); foot.classList.remove('red','green');
+  if(mode==='red'){top.classList.add('red');foot.classList.add('red');}
+  if(mode==='green'){top.classList.add('green');foot.classList.add('green');}
+  document.getElementById('barText').textContent=text;
+}
+function cloneFly(sourceEl,targetEl,onDone){
+  const sr=sourceEl.getBoundingClientRect();
+  const clone=document.createElement('div');
+  clone.className='flying-num';
+  clone.textContent=sourceEl.textContent;
+  clone.style.left=sr.left+'px'; clone.style.top=sr.top+'px';
+  clone.style.width=sr.width+'px'; clone.style.height=sr.height+'px';
+  clone.style.fontSize=getComputedStyle(sourceEl).fontSize;
+  document.body.appendChild(clone);
+  requestAnimationFrame(()=>{
+    const tr=targetEl.getBoundingClientRect();
+    clone.style.left=tr.left+'px'; clone.style.top=tr.top+'px';
+    clone.style.width=tr.width+'px'; clone.style.height=tr.height+'px';
+    clone.style.fontSize='16px';
+  });
+  setTimeout(()=>{ clone.remove(); onDone && onDone(); },560);
+}
+function checkout(){
+  const wA=a*200, wB=b*150, wT=wA+wB, pA=a*12, pB=b*6, pT=pA+pB;
+  document.getElementById('actionsBox').classList.add('hidden');
+  const calc=document.getElementById('calcBox');
+  calc.classList.remove('hidden');
+  ['wA','wAval','wB','wBval','wTotal','pA','pAval','pB','pBval','pTotal'].forEach(id=>document.getElementById(id).style.opacity=0);
+  cloneFly(document.getElementById('cntA'), document.getElementById('wA'));
+  cloneFly(document.getElementById('cntB'), document.getElementById('wB'));
+  setTimeout(()=>{
+    document.getElementById('wA').textContent=a+' × 200'; document.getElementById('wAval').textContent='= '+wA+' gm';
+    document.getElementById('wB').textContent=b+' × 150'; document.getElementById('wBval').textContent='= '+wB+' gm';
+    document.getElementById('wTotal').textContent=wT+' gm';
+    document.getElementById('pA').textContent=a+' × 12'; document.getElementById('pAval').textContent='= ₹'+pA;
+    document.getElementById('pB').textContent=b+' × 6'; document.getElementById('pBval').textContent='= ₹'+pB;
+    document.getElementById('pTotal').textContent='₹'+pT;
+    ['wA','wAval','wB','wBval','wTotal','pA','pAval','pB','pBval','pTotal'].forEach(id=>document.getElementById(id).style.opacity=1);
+    const correct=(wT===1000 && pT===48);
+    calc.classList.toggle('ok',correct);
+    const btn=document.getElementById('footBtn');
+    if(correct){
+      setBar('green',"The check-out is correct!!!");
+      document.getElementById('footText').textContent='Tap on Next button to check explanation!';
+      btn.textContent='Next'; btn.onclick=showExplain;
+    } else {
+      setBar('red',"The check-out isn't correct!!!");
+      document.getElementById('footText').textContent='Tap on Retry Button to try again!';
+      btn.textContent='Retry'; btn.onclick=retry;
+    }
+  },580);
+}
+function retry(){
+  setBar('normal',"Find the count of each fruit!");
+  document.getElementById('footText').textContent='Tap on "Check-out" when you get the right combination of fruits.';
+  document.getElementById('footBtn').onclick=null;
+  document.getElementById('calcBox').classList.add('hidden');
+  document.getElementById('actionsBox').classList.remove('hidden');
+}
+function showExplain(){
+  document.getElementById('interactive').classList.add('hidden');
+  document.getElementById('explain').classList.remove('hidden');
+  document.getElementById('ansA').textContent='a = '+a;
+  document.getElementById('ansB').textContent='b = '+b;
+  setBar('normal',"How does this work?");
+  document.getElementById('footText').textContent='';
+  const btn=document.getElementById('footBtn');
+  btn.textContent='Play Again'; btn.onclick=restartPuzzle;
+  document.getElementById('footbar').classList.add('green');
+}
+function restartPuzzle(){
+  a=0;b=0;
+  document.getElementById('explain').classList.add('hidden');
+  document.getElementById('hook').classList.remove('hidden');
+  setBar('normal',"Find the count of each fruit!");
+  document.getElementById('footText').textContent='';
+  document.getElementById('footbar').classList.remove('green');
+  document.getElementById('footBtn').onclick=null;
+}
+</script>
+</body>
+</html>
